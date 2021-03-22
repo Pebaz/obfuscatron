@@ -15,7 +15,7 @@ class XXX(object):
         self.asdf = [1, 2, 3]
         self.asdf[-1] = XXXXXXXXXXXXXXXXX
         with open('foo') as XXXX:
-            print(file.read())
+            print(XXXX.read())
 
 
 XXXXXXX = List[str]

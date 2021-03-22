@@ -93,25 +93,28 @@ class Encoder(ast.NodeTransformer):
             node
         )
     
-    def visit_Attribute(self, node):
-        # import ipdb; ipdb.set_trace()
-        return node
-        return ast.copy_location(
-            ast.Assign(
-                value=self.visit(node.value),
-                targets=[self.visit(i) for i in node.targets],
-                ctx=ast.Load()
-            ),
-            node
-        )
+    # def visit_Attribute(self, node):
+    #     return ast.copy_location(
+    #         ast.Attribute(
+    #             value=self.visit(node.value),
+    #             attr=self.visit(node.attr),
+    #             # attr=node.attr,
+    #             ctx=ast.Load()
+    #         ),
+    #         node
+    #     )
 
     def visit_Name(self, node):
         if node.id not in IGNORE_NAMES:
             return ast.copy_location(
-                ast.Name(id=self.get_new_name(node.id), ctx=ast.Load()),
+                ast.Name(
+                    id=self.get_new_name(node.id),
+                    ctx=ast.Load()
+                ),
                 node
             )
         return ast.NodeTransformer.generic_visit(self, node)
+        # return node
         
     
     def visit_arg(self, node):
@@ -129,17 +132,11 @@ class Encoder(ast.NodeTransformer):
             ),
             node
         )
-        
-        return ast.NodeTransformer.generic_visit(self, node)
 
     def visit_FunctionDef(self, node):
         # import ipdb; ipdb.set_trace()
 
         args = self.generic_visit(node.args)
-        # try:
-        #     args = self.visit(node.args)
-        # except AttributeError:
-        #     args = node.args
         return ast.copy_location(
             ast.FunctionDef(
                 name=self.get_new_name(node.name),
@@ -149,13 +146,8 @@ class Encoder(ast.NodeTransformer):
             ),
             node
         )
-        return node
 
     def visit_ClassDef(self, node):
-        print(dir(node))
-        # return ast.NodeTransformer.generic_visit(self, node)
-        #return node
-
         return ast.copy_location(
             ast.ClassDef(
                 name=self.get_new_name(node.name),
