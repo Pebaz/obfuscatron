@@ -44,6 +44,8 @@ terrestrial = False
 foo = "😂😂😂"
 '''
 
+input_data = '123'
+
 def obfuscatron(data: str):
     compressed = brotli.compress(data.encode())
     encoded = compressed.hex()
@@ -83,6 +85,27 @@ class Encoder(ast.NodeTransformer):
     
     def get_new_name(self, node_name):
         # return 'X' * len(node_name)
+
+        # if node_name and node_name not in self.IGNORE_NAMES:
+
+        #     if not self.done:
+        #         if node_name in self.name_storage:
+        #             new_name = self.name_storage[node_name]
+                
+        #         else:
+        #             data = self.reader.read(len(node_name))
+        #             new_name = '_' + data
+
+        #             if len(data) < len(node_name):
+        #                 new_name += 'd____b'
+        #                 self.done = True
+
+        #             self.name_storage[node_name] = new_name
+
+        #         # print(node_name, '->', new_name)
+        #         return new_name
+        #     return node_name
+        # return node_name
 
         if node_name and node_name not in self.IGNORE_NAMES:
 
