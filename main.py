@@ -81,12 +81,34 @@ class Encoder(ast.NodeTransformer):
         self.done = False
     
     def get_new_name(self, node_name):
-        pass
+        return 'X' * len(node_name)
+
+    def visit_Assign(self, node):
+        return ast.copy_location(
+            ast.Assign(
+                value=self.visit(node.value),
+                targets=[self.visit(i) for i in node.targets],
+                ctx=ast.Load()
+            ),
+            node
+        )
+    
+    def visit_Attribute(self, node):
+        # import ipdb; ipdb.set_trace()
+        return node
+        return ast.copy_location(
+            ast.Assign(
+                value=self.visit(node.value),
+                targets=[self.visit(i) for i in node.targets],
+                ctx=ast.Load()
+            ),
+            node
+        )
 
     def visit_Name(self, node):
         if node.id not in IGNORE_NAMES:
             return ast.copy_location(
-                ast.Name(id='XXXX', ctx=ast.Load()),
+                ast.Name(id=self.get_new_name(node.id), ctx=ast.Load()),
                 node
             )
         return ast.NodeTransformer.generic_visit(self, node)
@@ -101,7 +123,7 @@ class Encoder(ast.NodeTransformer):
 
         return ast.copy_location(
             ast.arg(
-                arg='XXXX',
+                arg=self.get_new_name(node.arg),
                 annotation=annotation,
                 ctx=ast.Load()
             ),
@@ -120,7 +142,7 @@ class Encoder(ast.NodeTransformer):
         #     args = node.args
         return ast.copy_location(
             ast.FunctionDef(
-                name='X' * len(node.name),
+                name=self.get_new_name(node.name),
                 body=[self.visit(i) for i in node.body],
                 decorator_list=[self.visit(i) for i in node.decorator_list],
                 args=args,
@@ -136,7 +158,7 @@ class Encoder(ast.NodeTransformer):
 
         return ast.copy_location(
             ast.ClassDef(
-                name='X' * len(node.name),
+                name=self.get_new_name(node.name),
                 bases=[self.visit(i) for i in node.bases],
                 body=[self.visit(i) for i in node.body],
                 decorator_list=[self.visit(i) for i in node.decorator_list],
@@ -156,7 +178,6 @@ class Encoder(ast.NodeTransformer):
     def visit_ImportFrom(self, node):
         names = [getattr(n, 'id', getattr(n, 'name', '')) for n in node.names]
         IGNORE_NAMES.update(names)
-        # return ast.NodeTransformer.generic_visit(self, node)
         return node
 
     # def visit_Name(self, node):
@@ -239,5 +260,5 @@ def main(args):
         file.write(astor.to_source(tree))
 
 
-main(['main.py', 'encode'])
+main(['example.py', 'encode'])
 
