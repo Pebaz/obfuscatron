@@ -37,13 +37,13 @@ foo = "😂😂😂\"
 """
 
 
-def XXXX(XXXX: str):
+def XXXXXXXXXXX(XXXX: str):
     XXXX = brotli.compress(XXXX.encode())
     XXXX = XXXX.hex()
     return XXXX
 
 
-def XXXX(XXXX: str):
+def XXXXXXXXXXXXX(XXXX: str):
     XXXX = bytes.fromhex(XXXX)
     XXXX = brotli.decompress(XXXX)
     return XXXX.decode()
@@ -52,60 +52,61 @@ def XXXX(XXXX: str):
 assert XXXX(XXXX(XXXX)) == XXXX
 
 
-class XXXX:
+class XXXXXXXXXX:
 
-    def XXXX(self, data):
+    def XXXXXXXX(XXXX, XXXX):
         self.data = XXXX
         self.pointer = 0
 
-    def XXXX(self, chunk_size):
+    def XXXX(XXXX, XXXX):
         XXXX = self.pointer + XXXX
         XXXX = self.data[self.pointer:XXXX]
         self.pointer = XXXX
         return XXXX
 
 
-class XXXX(ast.NodeTransformer):
+class XXXXXXX(ast.NodeTransformer):
 
-    def XXXX(self, reader):
+    def XXXXXXXX(XXXX, XXXX):
         ast.NodeTransformer.__init__(self)
         self.reader = XXXX
         self.name_storage = {}
         self.done = False
 
-    def XXXX(self, node_name):
+    def XXXXXXXXXXXX(XXXX, XXXX):
         pass
 
-    def XXXX(self, node):
+    def XXXXXXXXXX(XXXX, XXXX):
         if XXXX.id not in XXXX:
             return ast.copy_location(ast.Name(id='XXXX', ctx=ast.Load()), XXXX)
         return ast.NodeTransformer.generic_visit(self, XXXX)
 
-    def XXXX(self, node):
-        XXXX = self.visit(XXXX.annotation)
+    def XXXXXXXXX(XXXX, XXXX):
+        if XXXX.annotation:
+            XXXX = self.visit(XXXX.annotation)
+        else:
+            XXXX = XXXX.annotation
         return ast.copy_location(ast.arg(arg='XXXX', annotation=XXXX, ctx=
             ast.Load()), XXXX)
         return ast.NodeTransformer.generic_visit(self, XXXX)
 
-    def XXXX(self, node):
-        try:
-            XXXX = self.visit(XXXX.args)
-        except AttributeError:
-            XXXX = XXXX.args
-        return ast.copy_location(ast.FunctionDef(name='XXXX', body=[self.
-            visit(XXXX) for XXXX in XXXX.body], decorator_list=[self.visit(
-            XXXX) for XXXX in XXXX.decorator_list], args=XXXX), XXXX)
+    def XXXXXXXXXXXXXXXXX(XXXX, XXXX):
+        XXXX = self.generic_visit(XXXX.args)
+        return ast.copy_location(ast.FunctionDef(name='X' * len(XXXX.name),
+            body=[self.visit(XXXX) for XXXX in XXXX.body], decorator_list=[
+            self.visit(XXXX) for XXXX in XXXX.decorator_list], args=XXXX), XXXX
+            )
         return XXXX
 
-    def XXXX(self, node):
+    def XXXXXXXXXXXXXX(XXXX, XXXX):
         print(dir(XXXX))
-        return ast.copy_location(ast.ClassDef(name='XXXX', bases=[self.
-            visit(XXXX) for XXXX in XXXX.bases], body=[self.visit(XXXX) for
-            XXXX in XXXX.body], decorator_list=[self.visit(XXXX) for XXXX in
-            XXXX.decorator_list], keywords=[self.visit(XXXX) for XXXX in
-            XXXX.keywords]), XXXX)
+        return ast.copy_location(ast.ClassDef(name='X' * len(XXXX.name),
+            bases=[self.visit(XXXX) for XXXX in XXXX.bases], body=[self.
+            visit(XXXX) for XXXX in XXXX.body], decorator_list=[self.visit(
+            XXXX) for XXXX in XXXX.decorator_list], keywords=[self.visit(
+            XXXX) for XXXX in XXXX.keywords]), XXXX)
 
-    def XXXX(self, node):
+    def XXXXXXXXXXXX(XXXX, XXXX):
         XXXX = [getattr(XXXX, 'id', getattr(XXXX, 'name', '')) for XXXX in
             XXXX.names]
         XXXX.update(XXXX)
@@ -113,13 +114,13 @@ class XXXX(ast.NodeTransformer):
             self.visit(XXXX)
         return ast.NodeTransformer.generic_visit(self, XXXX)
 
-    def XXXX(self, node):
+    def XXXXXXXXXXXXXXXX(XXXX, XXXX):
         XXXX = [getattr(XXXX, 'id', getattr(XXXX, 'name', '')) for XXXX in
             XXXX.names]
         XXXX.update(XXXX)
         return XXXX
 
-    def XXXX(self, node):
+    def XXXXXXXXXXXXXXXXXXXXXXXXXXXX(XXXX, XXXX):
         XXXX = None
         if isinstance(XXXX, (ast.Import, ast.ImportFrom)):
             XXXX.update(XXXX.names)
@@ -146,7 +147,7 @@ class XXXX(ast.NodeTransformer):
         return super().generic_visit(XXXX)
 
 
-def XXXX(args):
+def XXXX(XXXX):
     XXXX, XXXX = XXXX[0], XXXX[1] == 'encode'
     XXXX = XXXX(XXXX(XXXX))
     XXXX = ast.parse(open(XXXX).read())

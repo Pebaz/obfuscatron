@@ -93,10 +93,18 @@ class Encoder(ast.NodeTransformer):
         
     
     def visit_arg(self, node):
-        annotation = self.visit(node.annotation)
+
+        if node.annotation:
+            annotation = self.visit(node.annotation)
+        else:
+            annotation = node.annotation
 
         return ast.copy_location(
-            ast.arg(arg='XXXX', annotation=annotation, ctx=ast.Load()),
+            ast.arg(
+                arg='XXXX',
+                annotation=annotation,
+                ctx=ast.Load()
+            ),
             node
         )
         
@@ -105,13 +113,14 @@ class Encoder(ast.NodeTransformer):
     def visit_FunctionDef(self, node):
         # import ipdb; ipdb.set_trace()
 
-        try:
-            args = self.visit(node.args)
-        except AttributeError:
-            args = node.args
+        args = self.generic_visit(node.args)
+        # try:
+        #     args = self.visit(node.args)
+        # except AttributeError:
+        #     args = node.args
         return ast.copy_location(
             ast.FunctionDef(
-                name='XXXX',
+                name='X' * len(node.name),
                 body=[self.visit(i) for i in node.body],
                 decorator_list=[self.visit(i) for i in node.decorator_list],
                 args=args,
@@ -127,7 +136,7 @@ class Encoder(ast.NodeTransformer):
 
         return ast.copy_location(
             ast.ClassDef(
-                name='XXXX',
+                name='X' * len(node.name),
                 bases=[self.visit(i) for i in node.bases],
                 body=[self.visit(i) for i in node.body],
                 decorator_list=[self.visit(i) for i in node.decorator_list],
