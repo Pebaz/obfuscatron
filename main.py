@@ -43,30 +43,80 @@ def deobfuscatron(data: str):
     return decompressed.decode()
 
 
-# compressed = brotli.compress(input_data.encode())
-# encoded = compressed.hex()
-
-# print('    Normal:', len(input_data.encode()))
-# print('Compressed:', len(compressed))
-# print('Encoded:', len(encoded), encoded)
-
-# decoded = bytes.fromhex(encoded)
-# print('Decoded:', len(encoded), decoded)
-# decompressed = brotli.decompress(decoded)
-# print('Decompressed:', len(decompressed))
-# normal = decompressed.decode()
-# print('    Normal:', len(normal), normal)
-
-# print('Successful:', normal == input_data)
-
 assert deobfuscatron(obfuscatron(input_data)) == input_data
 
-print(obfuscatron(input_data))
-print(deobfuscatron(obfuscatron(input_data)))
 
+# Treat bytes.fromhex() error as end of stream. Use underscores to mark this
+
+class DataReader:
+    def __init__(self, data):
+        self.data = data
+        self.pointer = 0
+    
+    def read(self, chunk_size):
+        end = self.pointer + chunk_size
+        result = self.data[self.pointer:end]
+        self.pointer = end
+        return result
+
+
+class Encoder(ast.NodeTransformer):
+    def __init__(self, reader):
+        ast.NodeTransformer.__init__(self)
+        self.reader = reader
+        self.builtin_names = set(dir(builtins))
+        self.builtin_names.add('self')
+        self.name_storage = {}
+        self.done = False
+
+    def visit_Name(self, node):
+        if node.id in self.builtin_names:
+            return node
+
+        elif node.id in self.name_storage:
+            precomputed = self.name_storage[node.id]
+            return ast.copy_location(
+                ast.Name(id=precomputed, ctx=ast.Load()),
+                node
+            )
+        
+        elif self.done:
+            return node
+
+        data = self.reader.read(len(node.id))
+
+        if not data:
+            new_name = 'd_____b'
+            self.done = True
+
+        obfuscated = obfuscatron(data)
+
+        if len(data) < len(node.id):
+            new_name = '_' + obfuscated + 'd_____b'
+        else:
+            new_name = '_' + obfuscated
+
+        self.name_storage[node.id] = new_name
+
+        return ast.copy_location(ast.Name(id=new_name, ctx=ast.Load()), node)
+
+
+
+def main(args):
+    filename, encode = args[0], args[1] == 'encode'
+
+    reader = DataReader(input_data)
+
+    tree = ast.parse(open(filename).read())
+    tree = Encoder(reader).visit(tree)
+
+    with open('out.obfuscatron.py', 'w') as file:
+        file.write(astor.to_source(tree))
+
+
+main(['main.py', 'encode'])
 quit()
 
-compressed = brotli.compress(input_data.encode())
 
 source = '''
 something = 1
