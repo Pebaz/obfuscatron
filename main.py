@@ -260,6 +260,154 @@ class Encoder(ast.NodeTransformer):
         return super().generic_visit(node)
 
 
+class Decoder(ast.NodeTransformer):
+    def __init__(self):
+        ast.NodeTransformer.__init__(self)
+        self.name_storage = {}
+        self.done = False
+
+
+    def visit_Assign(self, node):
+        return ast.copy_location(
+            ast.Assign(
+                value=self.visit(node.value),
+                targets=[self.visit(i) for i in node.targets],
+                ctx=ast.Load()
+            ),
+            node
+        )
+
+    def visit_Name(self, node):
+        if node.id not in IGNORE_NAMES:
+            self.name_storage[node.id] = None
+        return ast.NodeTransformer.generic_visit(self, node)
+        
+    
+    def visit_arg(self, node):
+
+        if node.annotation:
+            annotation = self.visit(node.annotation)
+        else:
+            annotation = node.annotation
+
+        return ast.copy_location(
+            ast.arg(
+                arg=self.get_new_name(node.arg),
+                annotation=annotation,
+                ctx=ast.Load()
+            ),
+            node
+        )
+
+    def visit_FunctionDef(self, node):
+        # import ipdb; ipdb.set_trace()
+
+        args = self.generic_visit(node.args)
+        return ast.copy_location(
+            ast.FunctionDef(
+                name=self.get_new_name(node.name),
+                body=[self.visit(i) for i in node.body],
+                decorator_list=[self.visit(i) for i in node.decorator_list],
+                args=args,
+            ),
+            node
+        )
+
+    def visit_ClassDef(self, node):
+        return ast.copy_location(
+            ast.ClassDef(
+                name=self.get_new_name(node.name),
+                bases=[self.visit(i) for i in node.bases],
+                body=[self.visit(i) for i in node.body],
+                decorator_list=[self.visit(i) for i in node.decorator_list],
+                keywords=[self.visit(i) for i in node.keywords]
+            ),
+            node
+        )
+        
+    
+    def visit_Import(self, node):
+        names = [getattr(n, 'id', getattr(n, 'name', '')) for n in node.names]
+        IGNORE_NAMES.update(names)
+        for inner in node.names:
+            self.visit(inner)
+        return ast.NodeTransformer.generic_visit(self, node)
+    
+    def visit_ImportFrom(self, node):
+        names = [getattr(n, 'id', getattr(n, 'name', '')) for n in node.names]
+        IGNORE_NAMES.update(names)
+        return node
+
+    # def visit_Name(self, node):
+    #     if node.id in self.builtin_names:
+    #         return node
+
+    #     elif node.id in self.name_storage:
+    #         precomputed = self.name_storage[node.id]
+    #         return ast.copy_location(
+    #             ast.Name(id=precomputed, ctx=ast.Load()),
+    #             node
+    #         )
+        
+    #     elif self.done:
+    #         return node
+
+    #     data = self.reader.read(len(node.id))
+
+    #     if not data:
+    #         new_name = 'd_____b'
+    #         self.done = True
+
+    #     obfuscated = obfuscatron(data)
+
+    #     if len(data) < len(node.id):
+    #         new_name = '_' + obfuscated + 'd_____b'
+    #     else:
+    #         new_name = '_' + obfuscated
+
+    #     self.name_storage[node.id] = new_name
+
+    #     return ast.copy_location(ast.Name(id=new_name, ctx=ast.Load()), node)
+    
+    def asdfasdfasfdasdfasdfasdfasdf(self, node):
+        node_name = None
+
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            IGNORE_NAMES.update(node.names)
+
+        elif not self.done:
+            if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
+                node_name = node.name
+            elif isinstance(node, ast.Name):
+                node_name = node.id
+            if node_name and node_name not in IGNORE_NAMES:
+                print(node_name)
+
+                if node_name in self.name_storage:
+                    new_name = self.name_storage[node_name]
+                
+                else:
+                    data = self.reader.read(len(node_name))
+                    new_name = '_' + data
+
+                    if len(data) < len(node_name):
+                        new_name += 'd____b'
+                        self.done = True
+
+                    self.name_storage[node_name] = new_name
+
+                    return ast.copy_location(
+                        ast.Name(id=new_name, ctx=ast.Load()),
+                        node
+                    )
+
+        if node_name:
+            print(':(', node_name)
+        return super().generic_visit(node)
+
+
+
+
 def main(args):
     filename, encode = args[0], args[1] == 'encode'
 
@@ -273,6 +421,14 @@ def main(args):
         file.write(astor.to_source(tree))
     
     print(encoder.name_storage)
+
+
+    tree = ast.parse(open('out.obfuscatron.py').read())
+    decoder = Decoder()
+    tree = decoder.visit(tree)
+
+    print(decoder.name_storage)
+
 
 
 main(['example.py', 'encode'])
