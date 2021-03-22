@@ -266,10 +266,13 @@ def main(args):
     reader = DataReader(obfuscatron(input_data))
 
     tree = ast.parse(open(filename).read())
-    tree = Encoder(reader).visit(tree)
+    encoder = Encoder(reader)
+    tree = encoder.visit(tree)
 
     with open('out.obfuscatron.py', 'w') as file:
         file.write(astor.to_source(tree))
+    
+    print(encoder.name_storage)
 
 
 main(['example.py', 'encode'])
