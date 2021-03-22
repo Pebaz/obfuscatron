@@ -14,6 +14,19 @@ import builtins, ast, textwrap, base64
 from urllib.parse import quote_plus
 import astor, brotli
 
+
+IGNORE_NAMES = {
+    '__new__', '__init__', '__del__', '__repr__', '__str__', '__bytes__',
+    '__format__', '__lt__', '__le__', '__eq__', '__ne__', '__gt__', '__ge__',
+    '__add__', '__sub__', '__mul__', '__matmul__', '__truediv__',
+    '__floordiv__', '__abs__', '__int__', '__float__', '__complex__',
+    '__round__', '__trunc__', '__ceil__', '__floor__', '__len__', '__getitem__',
+    '__setitem__', '__delitem__', '__iter__', 'self'
+}.union(i for i in dir(builtins))
+
+
+
+
 input_data = '''
 name = Earth
 radius = 39000000
@@ -64,48 +77,112 @@ class Encoder(ast.NodeTransformer):
     def __init__(self, reader):
         ast.NodeTransformer.__init__(self)
         self.reader = reader
-        self.builtin_names = set(dir(builtins))
-        self.builtin_names.add('self')
         self.name_storage = {}
         self.done = False
+    
+    def get_new_name(self, node_name):
+        pass
 
     def visit_Name(self, node):
-        if node.id in self.builtin_names:
-            return node
-
-        elif node.id in self.name_storage:
-            precomputed = self.name_storage[node.id]
+        if node.id not in IGNORE_NAMES:
             return ast.copy_location(
-                ast.Name(id=precomputed, ctx=ast.Load()),
+                ast.Name(id='XXXX', ctx=ast.Load()),
                 node
             )
+        return node
+
+    def visit_FunctionDef(self, node):
+        return ast.NodeTransformer.generic_visit(self, node)
+
+    def visit_ClassDef(self, node):
+        return node
+    
+    def visit_Import(self, node):
+        names = [getattr(n, 'id', getattr(n, 'name', '')) for n in node.names]
+        print(1, names)
+        IGNORE_NAMES.update(names)
+        for inner in node.names:
+            self.visit(inner)
+        return node
+    
+    def visit_ImportFrom(self, node):
+        names = [getattr(n, 'id', getattr(n, 'name', '')) for n in node.names]
+        print(2, names)
+        IGNORE_NAMES.update(names)
+        return node
+
+    # def visit_Name(self, node):
+    #     if node.id in self.builtin_names:
+    #         return node
+
+    #     elif node.id in self.name_storage:
+    #         precomputed = self.name_storage[node.id]
+    #         return ast.copy_location(
+    #             ast.Name(id=precomputed, ctx=ast.Load()),
+    #             node
+    #         )
         
-        elif self.done:
-            return node
+    #     elif self.done:
+    #         return node
 
-        data = self.reader.read(len(node.id))
+    #     data = self.reader.read(len(node.id))
 
-        if not data:
-            new_name = 'd_____b'
-            self.done = True
+    #     if not data:
+    #         new_name = 'd_____b'
+    #         self.done = True
 
-        obfuscated = obfuscatron(data)
+    #     obfuscated = obfuscatron(data)
 
-        if len(data) < len(node.id):
-            new_name = '_' + obfuscated + 'd_____b'
-        else:
-            new_name = '_' + obfuscated
+    #     if len(data) < len(node.id):
+    #         new_name = '_' + obfuscated + 'd_____b'
+    #     else:
+    #         new_name = '_' + obfuscated
 
-        self.name_storage[node.id] = new_name
+    #     self.name_storage[node.id] = new_name
 
-        return ast.copy_location(ast.Name(id=new_name, ctx=ast.Load()), node)
+    #     return ast.copy_location(ast.Name(id=new_name, ctx=ast.Load()), node)
+    
+    def generic_visit(self, node):
+        node_name = None
 
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            IGNORE_NAMES.update(node.names)
+
+        elif not self.done:
+            if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
+                node_name = node.name
+            elif isinstance(node, ast.Name):
+                node_name = node.id
+            if node_name and node_name not in IGNORE_NAMES:
+                print(node_name)
+
+                if node_name in self.name_storage:
+                    new_name = self.name_storage[node_name]
+                
+                else:
+                    data = self.reader.read(len(node_name))
+                    new_name = '_' + data
+
+                    if len(data) < len(node_name):
+                        new_name += 'd____b'
+                        self.done = True
+
+                    self.name_storage[node_name] = new_name
+
+                    return ast.copy_location(
+                        ast.Name(id=new_name, ctx=ast.Load()),
+                        node
+                    )
+
+        if node_name:
+            print(':(', node_name)
+        return super().generic_visit(node)
 
 
 def main(args):
     filename, encode = args[0], args[1] == 'encode'
 
-    reader = DataReader(input_data)
+    reader = DataReader(obfuscatron(input_data))
 
     tree = ast.parse(open(filename).read())
     tree = Encoder(reader).visit(tree)
@@ -114,48 +191,5 @@ def main(args):
         file.write(astor.to_source(tree))
 
 
-main(['main.py', 'encode'])
-quit()
+main(['example.py', 'encode'])
 
-
-source = '''
-something = 1
-something_else = 2 ** something
-def add(a: int, b: int) -> int:
-    if not all((isinstance(a, int), isinstance(b, int))):
-        raise TypeError('Arguments must be int')
-    return a + b
-'''
-
-tree = ast.parse(source)
-
-builtins = set(dir(builtins))
-data = {}
-encrypt = True
-
-class RewriteName(ast.NodeTransformer):
-    def visit_Name(self, node):
-        global data, encrypt
-
-        if node.id in builtins:
-            return node
-
-        if encrypt:
-            new_name = data.setdefault(node.id, node.id.upper())
-        else:
-            new_name = data.setdefault(node.id, node.id.lower())
-
-        return ast.copy_location(ast.Name(id=new_name, ctx=ast.Load()), node)
-
-tree = RewriteName().visit(tree)
-
-print('Before:', textwrap.indent(source, ' |  '))
-print('After:\n' + textwrap.indent(astor.to_source(tree), ' |  '))
-
-print(data)
-print('Data Storage Capacity:', sum(len(i) for i in data))
-
-encrypt = False
-tree = RewriteName().visit(tree)
-print('After:\n' + textwrap.indent(astor.to_source(tree), ' |  '))
-print(data)
