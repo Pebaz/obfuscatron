@@ -21,15 +21,15 @@ class _1bc(object):
 _c7ec12a = List[str]
 
 
-def _9d4f(_02ab3: _c7ec12a):
-    _6837a06d3 = 0
-    for _f68205916 in _02ab3:
-        _6837a06d3 += 1
-        print(_f68205916)
-    return _6837a06d3
+def _02ab(_05916: _c7ec12a):
+    _39d4f6837 = 0
+    for _a06d3f682 in _05916:
+        _39d4f6837 += 1
+        print(_a06d3f682)
+    return _39d4f6837
 
 
-_604114 = _9d4f(pathsep.join(sys.path).split(pathsep))
+_604114 = _02ab(pathsep.join(sys.path).split(pathsep))
 print(_604114)
 print(pathsep)
 print(sys)
