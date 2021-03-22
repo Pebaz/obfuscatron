@@ -93,10 +93,6 @@ class Encoder(ast.NodeTransformer):
         
     
     def visit_arg(self, node):
-        print(node.arg)
-        # import ipdb; ipdb.set_trace()
-
-        # annotation = ast.NodeTransformer.generic_visit(self, node.annotation)
         annotation = self.visit(node.annotation)
 
         return ast.copy_location(
@@ -107,14 +103,42 @@ class Encoder(ast.NodeTransformer):
         return ast.NodeTransformer.generic_visit(self, node)
 
     def visit_FunctionDef(self, node):
-        return ast.NodeTransformer.generic_visit(self, node)
+        # import ipdb; ipdb.set_trace()
+
+        try:
+            args = self.visit(node.args)
+        except AttributeError:
+            args = node.args
+        return ast.copy_location(
+            ast.FunctionDef(
+                name='XXXX',
+                body=[self.visit(i) for i in node.body],
+                decorator_list=[self.visit(i) for i in node.decorator_list],
+                args=args,
+            ),
+            node
+        )
+        return node
 
     def visit_ClassDef(self, node):
-        return ast.NodeTransformer.generic_visit(self, node)
+        print(dir(node))
+        # return ast.NodeTransformer.generic_visit(self, node)
+        #return node
+
+        return ast.copy_location(
+            ast.ClassDef(
+                name='XXXX',
+                bases=[self.visit(i) for i in node.bases],
+                body=[self.visit(i) for i in node.body],
+                decorator_list=[self.visit(i) for i in node.decorator_list],
+                keywords=[self.visit(i) for i in node.keywords]
+            ),
+            node
+        )
+        
     
     def visit_Import(self, node):
         names = [getattr(n, 'id', getattr(n, 'name', '')) for n in node.names]
-        print(1, names)
         IGNORE_NAMES.update(names)
         for inner in node.names:
             self.visit(inner)
@@ -122,9 +146,9 @@ class Encoder(ast.NodeTransformer):
     
     def visit_ImportFrom(self, node):
         names = [getattr(n, 'id', getattr(n, 'name', '')) for n in node.names]
-        print(2, names)
         IGNORE_NAMES.update(names)
-        return ast.NodeTransformer.generic_visit(self, node)
+        # return ast.NodeTransformer.generic_visit(self, node)
+        return node
 
     # def visit_Name(self, node):
     #     if node.id in self.builtin_names:
@@ -157,7 +181,7 @@ class Encoder(ast.NodeTransformer):
 
     #     return ast.copy_location(ast.Name(id=new_name, ctx=ast.Load()), node)
     
-    def generic_visit(self, node):
+    def asdfasdfasfdasdfasdfasdfasdf(self, node):
         node_name = None
 
         if isinstance(node, (ast.Import, ast.ImportFrom)):
@@ -206,5 +230,5 @@ def main(args):
         file.write(astor.to_source(tree))
 
 
-main(['example.py', 'encode'])
+main(['main.py', 'encode'])
 

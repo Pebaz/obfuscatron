@@ -2,6 +2,9 @@ import sys
 from os import pathsep
 from typing import List
 
+class Foo(object):
+    def __init__(self, name):
+        self.name = name
 
 FooList = List[str]
 
