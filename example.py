@@ -1,8 +1,11 @@
 import sys
 from os import pathsep
+from typing import List
 
 
-def show(items):
+FooList = List[str]
+
+def show(items: FooList):
     the_count = 0
     for each_name in items:
         the_count += 1

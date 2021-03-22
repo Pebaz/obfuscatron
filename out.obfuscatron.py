@@ -1,8 +1,10 @@
 import sys
 from os import pathsep
+from typing import List
+XXXX = List[str]
 
 
-def show(items):
+def show(XXXX: XXXX):
     XXXX = 0
     for XXXX in XXXX:
         XXXX += 1

@@ -89,13 +89,28 @@ class Encoder(ast.NodeTransformer):
                 ast.Name(id='XXXX', ctx=ast.Load()),
                 node
             )
-        return node
+        return ast.NodeTransformer.generic_visit(self, node)
+        
+    
+    def visit_arg(self, node):
+        print(node.arg)
+        # import ipdb; ipdb.set_trace()
+
+        # annotation = ast.NodeTransformer.generic_visit(self, node.annotation)
+        annotation = self.visit(node.annotation)
+
+        return ast.copy_location(
+            ast.arg(arg='XXXX', annotation=annotation, ctx=ast.Load()),
+            node
+        )
+        
+        return ast.NodeTransformer.generic_visit(self, node)
 
     def visit_FunctionDef(self, node):
         return ast.NodeTransformer.generic_visit(self, node)
 
     def visit_ClassDef(self, node):
-        return node
+        return ast.NodeTransformer.generic_visit(self, node)
     
     def visit_Import(self, node):
         names = [getattr(n, 'id', getattr(n, 'name', '')) for n in node.names]
@@ -103,13 +118,13 @@ class Encoder(ast.NodeTransformer):
         IGNORE_NAMES.update(names)
         for inner in node.names:
             self.visit(inner)
-        return node
+        return ast.NodeTransformer.generic_visit(self, node)
     
     def visit_ImportFrom(self, node):
         names = [getattr(n, 'id', getattr(n, 'name', '')) for n in node.names]
         print(2, names)
         IGNORE_NAMES.update(names)
-        return node
+        return ast.NodeTransformer.generic_visit(self, node)
 
     # def visit_Name(self, node):
     #     if node.id in self.builtin_names:
