@@ -81,7 +81,27 @@ class Encoder(ast.NodeTransformer):
         self.done = False
     
     def get_new_name(self, node_name):
-        return 'X' * len(node_name)
+        # return 'X' * len(node_name)
+
+        if node_name and node_name not in IGNORE_NAMES:
+
+            if node_name in self.name_storage:
+                new_name = self.name_storage[node_name]
+            
+            else:
+                data = self.reader.read(len(node_name))
+                new_name = '_' + data
+
+                if len(data) < len(node_name):
+                    new_name += 'd____b'
+                    self.done = True
+
+                self.name_storage[node_name] = new_name
+
+            print(node_name, '->', new_name)
+            return new_name
+        return node_name
+
 
     def visit_Assign(self, node):
         return ast.copy_location(

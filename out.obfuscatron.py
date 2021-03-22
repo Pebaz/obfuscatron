@@ -3,33 +3,33 @@ from os import pathsep
 from typing import List
 
 
-class XXX(object):
+class _1bc(object):
 
-    def XXXXXXXX(XXXX, XXXX):
-        self.name = XXXX
+    def __init__(self, _e000):
+        self.name = _e000
         self.foo = 'asdf'
         self.a1 = sys.argv
         self.a2 = self.a1.clear
-        XXXXXXXXXXXXXXXXX = 100
-        self.what = XXXXXXXXXXXXXXXXX
+        _02c0eec86d77b1da1 = 100
+        self.what = _02c0eec86d77b1da1
         self.asdf = [1, 2, 3]
-        self.asdf[-1] = XXXXXXXXXXXXXXXXX
-        with open('foo') as XXXX:
-            print(XXXX.read())
+        self.asdf[-1] = _02c0eec86d77b1da1
+        with open('foo') as _0bbf:
+            print(_0bbf.read())
 
 
-XXXXXXX = List[str]
+_c7ec12a = List[str]
 
 
-def XXXX(XXXXX: XXXXXXX):
-    XXXXXXXXX = 0
-    for XXXXXXXXX in XXXXX:
-        XXXXXXXXX += 1
-        print(XXXXXXXXX)
-    return XXXXXXXXX
+def _9d4f(_02ab3: _c7ec12a):
+    _6837a06d3 = 0
+    for _f68205916 in _02ab3:
+        _6837a06d3 += 1
+        print(_f68205916)
+    return _6837a06d3
 
 
-XXXXXX = XXXX(pathsep.join(sys.path).split(pathsep))
-print(XXXXXX)
+_604114 = _9d4f(pathsep.join(sys.path).split(pathsep))
+print(_604114)
 print(pathsep)
 print(sys)
