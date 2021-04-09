@@ -10,8 +10,7 @@ Decryption Plan:
 3. If magic byte is encountered, halt program
 """
 
-import builtins, ast, textwrap, base64
-from urllib.parse import quote_plus
+import builtins, ast, textwrap, base64, random, string
 import astor, brotli
 
 
@@ -25,6 +24,9 @@ IGNORE_NAMES = {
 }.union(i for i in dir(builtins))
 
 
+def get_random_string(length):
+    letters = string.ascii_lowercase + string.digits
+    return ''.join(random.SystemRandom().choice(letters) for _ in range(length))
 
 
 input_data = '''
@@ -116,7 +118,12 @@ class Encoder(ast.NodeTransformer):
                 data = self.reader.read(len(node_name))
                 new_name = '_' + data
 
-                if len(data) < len(node_name):
+                
+                if not data:
+                    new_name += get_random_string(len(node_name))
+                    self.done = True
+
+                elif len(data) < len(node_name):
                     new_name += 'd____b'
                     self.done = True
 
@@ -367,9 +374,11 @@ def main(args):
 
     buffer = ''
     for x in decoder.name_storage:
-        if x == '_d____b':
-            break
         buffer += x[1:].replace('d____b', '')
+
+        if 'd____b' in x:
+            break
+
     print('DATA BUFFER:', buffer)
     print('DATA:', deobfuscatron(buffer))
 
