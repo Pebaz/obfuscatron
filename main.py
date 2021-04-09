@@ -46,8 +46,7 @@ terrestrial = False
 foo = "😂😂😂"
 '''
 
-input_data = '123'
-input_data = get_random_string(1300)
+# input_data = '123'
 
 def obfuscatron(data: str):
     compressed = brotli.compress(data.encode())
@@ -392,7 +391,10 @@ def main(args):
             break
 
     print('DATA BUFFER:', buffer)
-    print('DATA:', deobfuscatron(buffer))
+    output_data = deobfuscatron(buffer)
+    print('DATA:', output_data)
+
+    assert output_data == input_data, 'Final test failed!'
 
 
 # TODO(pebaz): Raise exception when running out of space
