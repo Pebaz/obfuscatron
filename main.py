@@ -365,6 +365,14 @@ def main(args):
 
     print(decoder.name_storage.keys())
 
+    buffer = ''
+    for x in decoder.name_storage:
+        if x == '_d____b':
+            break
+        buffer += x[1:].replace('d____b', '')
+    print('DATA BUFFER:', buffer)
+    print('DATA:', deobfuscatron(buffer))
+
 
 
 main(['example.py', 'encode'])
