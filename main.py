@@ -47,6 +47,7 @@ foo = "😂😂😂"
 '''
 
 input_data = '123'
+input_data = get_random_string(1300)
 
 def obfuscatron(data: str):
     compressed = brotli.compress(data.encode())
@@ -73,8 +74,11 @@ class DataReader:
     def read(self, chunk_size):
         end = self.pointer + chunk_size
         result = self.data[self.pointer:end]
-        self.pointer = end
+        self.pointer = end  # min(end, len(self.data) - 1)
         return result
+    
+    def empty(self):
+        return self.pointer >= len(self.data) - 1
 
 
 class Encoder(ast.NodeTransformer):
@@ -118,9 +122,11 @@ class Encoder(ast.NodeTransformer):
                 data = self.reader.read(len(node_name))
                 new_name = '_' + data
 
-                
                 if not data:
-                    new_name += get_random_string(len(node_name))
+                    if not self.done:
+                        new_name += 'd____b'
+                    else:
+                        new_name += get_random_string(len(node_name))
                     self.done = True
 
                 elif len(data) < len(node_name):
@@ -365,6 +371,12 @@ def main(args):
     
     print(encoder.name_storage.values())
 
+    # Any data left in reader?
+    assert reader.empty(), (
+        f'Not enough storage space in file! '
+        f'Need {len(reader.data)} bytes but file storage capacity is '
+        f'{reader.pointer} bytes'
+    )
 
     tree = ast.parse(open('out.obfuscatron.py').read())
     decoder = Decoder()
@@ -381,6 +393,10 @@ def main(args):
 
     print('DATA BUFFER:', buffer)
     print('DATA:', deobfuscatron(buffer))
+
+
+# TODO(pebaz): Raise exception when running out of space
+# TODO(pebaz): CLI encoding and decoding files
 
 
 
