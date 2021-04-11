@@ -1,16 +1,5 @@
-"""
-Encryption Plan:
-1. Take in an amount of input text, brotli compress it and convert it to base64
-2. For each name in a given Python file, store an amount of text from input
-3. If run out of space or end of input data is encountered, write magic byte
-
-Decryption Plan:
-1. Take in a given Python file and scrape out all the names
-2. For each name, base64 decode it and then brotli decompress it
-3. If magic byte is encountered, halt program
-"""
-
-import builtins, ast, textwrap, base64, random, string
+import sys, builtins, ast, random, string
+from pathlib import Path
 import astor, brotli
 
 
@@ -357,7 +346,64 @@ class Decoder(ast.NodeTransformer):
 
 
 def main(args):
-    filename, encode = args[0], args[1] == 'encode'
+    try:
+        py_file = args[0]
+        encode = args[1] == 'encode'
+        data_file = args[2]
+        out_file = args[3]
+    except (ValueError, IndexError):
+        try:
+            py_file = args[0]
+            encode = args[1] == 'encode'
+            data_file = args[2]
+        except (ValueError, IndexError):
+            print(
+                'obfuscatron - store data in Python source files pretending to '
+                'be obfuscated\n'
+                'Usage:\n'
+                'obfuscatron FILE.py encode DATAFILE OUTFILE\n'
+                'obfuscatron OUTFILE.py decode DATAFILE'
+            )
+            return
+
+    if encode:
+        input_data = Path(data_file).read_text()
+        reader = DataReader(obfuscatron(input_data))
+        tree = ast.parse(open(py_file).read())
+        encoder = Encoder(reader)
+        obfuscated = encoder.visit(tree)
+
+        # Any data left in reader?
+        assert reader.empty(), (
+            f'Not enough storage space in file! '
+            f'Need {len(reader.data)} bytes but file storage capacity is '
+            f'{reader.pointer} bytes'
+        )
+
+        with open(out_file, 'w') as file:
+            file.write(astor.to_source(obfuscated))
+    else:
+        tree = ast.parse(open(py_file).read())
+        decoder = Decoder()
+        tree = decoder.visit(tree)
+        buffer = ''
+
+        for x in decoder.name_storage:
+            buffer += x[1:].replace('d____b', '')
+
+            if 'd____b' in x:
+                break
+
+        print('DATA BUFFER:', buffer)
+        output_data = deobfuscatron(buffer)
+        print('DATA:', output_data)
+
+        with open(data_file, 'w') as file:
+            file.write(output_data)
+
+    return
+
+
 
     reader = DataReader(obfuscatron(input_data))
 
@@ -397,10 +443,10 @@ def main(args):
     assert output_data == input_data, 'Final test failed!'
 
 
-# TODO(pebaz): Raise exception when running out of space
 # TODO(pebaz): CLI encoding and decoding files
 
 
-
-main(['example.py', 'encode'])
-
+if __name__ == '__main__':
+    # main(['example.py', 'encode', 'data.txt', 'foo.py'])
+    main(['foo.py', 'decode', 'data2.txt'])
+    # main(sys.argv[1:])
