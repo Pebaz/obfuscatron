@@ -18,8 +18,20 @@ def get_random_string(length):
     return ''.join(random.SystemRandom().choice(letters) for _ in range(length))
 
 
-def obfuscatron(data: str):
-    compressed = brotli.compress(data.encode())
+# def obfuscatron(data: str):
+#     compressed = brotli.compress(data.encode())
+#     encoded = compressed.hex()
+#     return encoded
+
+
+# def deobfuscatron(data: str):
+#     decoded = bytes.fromhex(data)
+#     decompressed = brotli.decompress(decoded)
+#     return decompressed.decode()
+
+
+def obfuscatron(data: bytes):
+    compressed = brotli.compress(data)
     encoded = compressed.hex()
     return encoded
 
@@ -27,7 +39,7 @@ def obfuscatron(data: str):
 def deobfuscatron(data: str):
     decoded = bytes.fromhex(data)
     decompressed = brotli.decompress(decoded)
-    return decompressed.decode()
+    return decompressed
 
 
 class DataReader:
@@ -246,7 +258,8 @@ def main(args):
             return
 
     if encode:
-        input_data = Path(data_file).read_text()
+        # ! input_data = Path(data_file).read_text()
+        input_data = Path(data_file).read_bytes()
         reader = DataReader(obfuscatron(input_data))
         tree = ast.parse(open(py_file).read())
         encoder = Encoder(reader)
@@ -275,10 +288,11 @@ def main(args):
 
         output_data = deobfuscatron(buffer)
 
-        with open(data_file, 'w') as file:
+        with open(data_file, 'wb') as file:
             file.write(output_data)
 
-# TODO(pebaz): Refactor to work with only binary data
+# TODO(pebaz): setup.py
+# TODO(pebaz): Upload to PyPI
 
 
 if __name__ == '__main__':
