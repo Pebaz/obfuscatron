@@ -18,18 +18,6 @@ def get_random_string(length):
     return ''.join(random.SystemRandom().choice(letters) for _ in range(length))
 
 
-# def obfuscatron(data: str):
-#     compressed = brotli.compress(data.encode())
-#     encoded = compressed.hex()
-#     return encoded
-
-
-# def deobfuscatron(data: str):
-#     decoded = bytes.fromhex(data)
-#     decompressed = brotli.decompress(decoded)
-#     return decompressed.decode()
-
-
 def obfuscatron(data: bytes):
     compressed = brotli.compress(data)
     encoded = compressed.hex()
@@ -236,7 +224,9 @@ class Decoder(ast.NodeTransformer):
         return node
 
 
-def main(args):
+def main(args=None):
+    args = args or sys.argv[1:]
+
     try:
         py_file = args[0]
         encode = args[1] == 'encode'
@@ -258,7 +248,6 @@ def main(args):
             return
 
     if encode:
-        # ! input_data = Path(data_file).read_text()
         input_data = Path(data_file).read_bytes()
         reader = DataReader(obfuscatron(input_data))
         tree = ast.parse(open(py_file).read())
