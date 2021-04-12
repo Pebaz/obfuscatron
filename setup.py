@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='stochastis',
-    version='1.0.2',
+    version='1.0.0',
     license="MIT",
     description=(
         'Encrypt data by storing it within a Python script that pretends to '
