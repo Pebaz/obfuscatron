@@ -237,7 +237,9 @@ def main(args=None):
             py_file = args[0]
             encode = args[1] == 'encode'
             data_file = args[2]
-        except (ValueError, IndexError):
+
+            assert encode in {'encode', 'decode'}
+        except (ValueError, IndexError, AssertionError):
             print(
                 'obfuscatron - store data in Python source files pretending to '
                 'be obfuscated\n'
@@ -274,6 +276,8 @@ def main(args=None):
 
             if 'd____b' in x:
                 break
+
+        print(buffer)
 
         output_data = deobfuscatron(buffer)
 
