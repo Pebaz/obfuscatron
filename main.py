@@ -361,8 +361,8 @@ def main(args):
                 'obfuscatron - store data in Python source files pretending to '
                 'be obfuscated\n'
                 'Usage:\n'
-                'obfuscatron FILE.py encode DATAFILE OUTFILE\n'
-                'obfuscatron OUTFILE.py decode DATAFILE'
+                '  obfuscatron FILE.py encode DATAFILE OUTFILE\n'
+                '  obfuscatron OUTFILE.py decode DATAFILE'
             )
             return
 
@@ -394,9 +394,7 @@ def main(args):
             if 'd____b' in x:
                 break
 
-        print('DATA BUFFER:', buffer)
         output_data = deobfuscatron(buffer)
-        print('DATA:', output_data)
 
         with open(data_file, 'w') as file:
             file.write(output_data)
@@ -444,9 +442,11 @@ def main(args):
 
 
 # TODO(pebaz): CLI encoding and decoding files
+# TODO(pebaz): Finish CLI
+# TODO(pebaz): Refactor to work with only binary data
 
 
 if __name__ == '__main__':
     # main(['example.py', 'encode', 'data.txt', 'foo.py'])
-    main(['foo.py', 'decode', 'data2.txt'])
-    # main(sys.argv[1:])
+    # main(['foo.py', 'decode', 'data2.txt'])
+    main(sys.argv[1:])

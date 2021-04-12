@@ -11,3 +11,17 @@ Right now, Obfuscatron is able to store data within the following Python syntax:
 * Class Names
 * Function Names
 * Type Hint Identifiers
+
+### Installation
+
+```bash
+$ pip install obfuscatron
+$ pip install "git+https://github.com/Pebaz/obfuscatron"
+```
+
+### Usage
+
+```bash
+$ obfuscatron FILE.py encode DATAFILE OUTFILE
+$ obfuscatron OUTFILE.py decode DATAFILE
+```
