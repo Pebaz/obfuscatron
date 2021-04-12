@@ -18,25 +18,6 @@ def get_random_string(length):
     return ''.join(random.SystemRandom().choice(letters) for _ in range(length))
 
 
-input_data = '''
-name = Earth
-radius = 39000000
-terrestrial = True
-foo = "😂"
-
-name = Mars
-radius = 12349282382
-terrestrial = True
-foo = "😂"
-
-name = Jupiter
-radius = 4300012323
-terrestrial = False
-foo = "😂😂😂"
-'''
-
-# input_data = '123'
-
 def obfuscatron(data: str):
     compressed = brotli.compress(data.encode())
     encoded = compressed.hex()
@@ -48,11 +29,6 @@ def deobfuscatron(data: str):
     decompressed = brotli.decompress(decoded)
     return decompressed.decode()
 
-
-assert deobfuscatron(obfuscatron(input_data)) == input_data
-
-
-# Treat bytes.fromhex() error as end of stream. Use underscores to mark this
 
 class DataReader:
     def __init__(self, data):
@@ -78,29 +54,6 @@ class Encoder(ast.NodeTransformer):
         self.done = False
     
     def get_new_name(self, node_name):
-        # return 'X' * len(node_name)
-
-        # if node_name and node_name not in self.IGNORE_NAMES:
-
-        #     if not self.done:
-        #         if node_name in self.name_storage:
-        #             new_name = self.name_storage[node_name]
-                
-        #         else:
-        #             data = self.reader.read(len(node_name))
-        #             new_name = '_' + data
-
-        #             if len(data) < len(node_name):
-        #                 new_name += 'd____b'
-        #                 self.done = True
-
-        #             self.name_storage[node_name] = new_name
-
-        #         # print(node_name, '->', new_name)
-        #         return new_name
-        #     return node_name
-        # return node_name
-
         if node_name and node_name not in self.IGNORE_NAMES:
 
             if node_name in self.name_storage:
@@ -123,7 +76,6 @@ class Encoder(ast.NodeTransformer):
 
                 self.name_storage[node_name] = new_name
 
-            # print(node_name, '->', new_name)
             return new_name
         return node_name
 
@@ -138,6 +90,7 @@ class Encoder(ast.NodeTransformer):
             node
         )
     
+    # TODO(pebaz): Get attributes working properly
     # def visit_Attribute(self, node):
     #     return ast.copy_location(
     #         ast.Attribute(
@@ -159,11 +112,9 @@ class Encoder(ast.NodeTransformer):
                 node
             )
         return ast.NodeTransformer.generic_visit(self, node)
-        # return node
         
     
     def visit_arg(self, node):
-
         if node.annotation:
             annotation = self.visit(node.annotation)
         else:
@@ -179,8 +130,6 @@ class Encoder(ast.NodeTransformer):
         )
 
     def visit_FunctionDef(self, node):
-        # import ipdb; ipdb.set_trace()
-
         return ast.copy_location(
             ast.FunctionDef(
                 name=self.get_new_name(node.name),
@@ -216,73 +165,6 @@ class Encoder(ast.NodeTransformer):
         self.IGNORE_NAMES.update(names)
         return node
 
-    # def visit_Name(self, node):
-    #     if node.id in self.builtin_names:
-    #         return node
-
-    #     elif node.id in self.name_storage:
-    #         precomputed = self.name_storage[node.id]
-    #         return ast.copy_location(
-    #             ast.Name(id=precomputed, ctx=ast.Load()),
-    #             node
-    #         )
-        
-    #     elif self.done:
-    #         return node
-
-    #     data = self.reader.read(len(node.id))
-
-    #     if not data:
-    #         new_name = 'd_____b'
-    #         self.done = True
-
-    #     obfuscated = obfuscatron(data)
-
-    #     if len(data) < len(node.id):
-    #         new_name = '_' + obfuscated + 'd_____b'
-    #     else:
-    #         new_name = '_' + obfuscated
-
-    #     self.name_storage[node.id] = new_name
-
-    #     return ast.copy_location(ast.Name(id=new_name, ctx=ast.Load()), node)
-    
-    def asdfasdfasfdasdfasdfasdfasdf(self, node):
-        node_name = None
-
-        if isinstance(node, (ast.Import, ast.ImportFrom)):
-            self.IGNORE_NAMES.update(node.names)
-
-        elif not self.done:
-            if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
-                node_name = node.name
-            elif isinstance(node, ast.Name):
-                node_name = node.id
-            if node_name and node_name not in self.IGNORE_NAMES:
-                print(node_name)
-
-                if node_name in self.name_storage:
-                    new_name = self.name_storage[node_name]
-                
-                else:
-                    data = self.reader.read(len(node_name))
-                    new_name = '_' + data
-
-                    if len(data) < len(node_name):
-                        new_name += 'd____b'
-                        self.done = True
-
-                    self.name_storage[node_name] = new_name
-
-                    return ast.copy_location(
-                        ast.Name(id=new_name, ctx=ast.Load()),
-                        node
-                    )
-
-        if node_name:
-            print(':(', node_name)
-        return super().generic_visit(node)
-
 
 class Decoder(ast.NodeTransformer):
     def __init__(self):
@@ -290,7 +172,6 @@ class Decoder(ast.NodeTransformer):
         self.name_storage = {}
         self.IGNORE_NAMES = {*IGNORE_NAMES}
         self.done = False
-
 
     def visit_Assign(self, node):
         return ast.copy_location(
@@ -320,7 +201,6 @@ class Decoder(ast.NodeTransformer):
         [self.visit(i) for i in node.body]
         self.generic_visit(node.args)
         return ast.NodeTransformer.generic_visit(self, node)
-        
 
     def visit_ClassDef(self, node):
         if node.name not in self.IGNORE_NAMES:
@@ -330,7 +210,6 @@ class Decoder(ast.NodeTransformer):
         [self.visit(i) for i in node.decorator_list]
         [self.visit(i) for i in node.keywords]
         return ast.NodeTransformer.generic_visit(self, node)
-        
     
     def visit_Import(self, node):
         names = [getattr(n, 'id', getattr(n, 'name', '')) for n in node.names]
@@ -399,54 +278,8 @@ def main(args):
         with open(data_file, 'w') as file:
             file.write(output_data)
 
-    return
-
-
-
-    reader = DataReader(obfuscatron(input_data))
-
-    tree = ast.parse(open(filename).read())
-    encoder = Encoder(reader)
-    tree = encoder.visit(tree)
-
-    with open('out.obfuscatron.py', 'w') as file:
-        file.write(astor.to_source(tree))
-    
-    print(encoder.name_storage.values())
-
-    # Any data left in reader?
-    assert reader.empty(), (
-        f'Not enough storage space in file! '
-        f'Need {len(reader.data)} bytes but file storage capacity is '
-        f'{reader.pointer} bytes'
-    )
-
-    tree = ast.parse(open('out.obfuscatron.py').read())
-    decoder = Decoder()
-    tree = decoder.visit(tree)
-
-    print(decoder.name_storage.keys())
-
-    buffer = ''
-    for x in decoder.name_storage:
-        buffer += x[1:].replace('d____b', '')
-
-        if 'd____b' in x:
-            break
-
-    print('DATA BUFFER:', buffer)
-    output_data = deobfuscatron(buffer)
-    print('DATA:', output_data)
-
-    assert output_data == input_data, 'Final test failed!'
-
-
-# TODO(pebaz): CLI encoding and decoding files
-# TODO(pebaz): Finish CLI
 # TODO(pebaz): Refactor to work with only binary data
 
 
 if __name__ == '__main__':
-    # main(['example.py', 'encode', 'data.txt', 'foo.py'])
-    # main(['foo.py', 'decode', 'data2.txt'])
     main(sys.argv[1:])
