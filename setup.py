@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name='stochastis',
+    name='obfuscatron',
     version='1.0.0',
     license="MIT",
     description=(
