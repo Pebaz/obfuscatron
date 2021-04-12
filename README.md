@@ -1,7 +1,7 @@
 # Obfuscatron
 
-Encrypt data by storing it within a Python script that pretends to just be
-"obfuscated"
+Python steganography tool to hide data by storing it within a Python script that
+pretends to just be "obfuscated"
 
 ### Features
 
