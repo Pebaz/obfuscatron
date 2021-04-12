@@ -5,7 +5,10 @@ Encrypt data by storing it within a Python script that pretends to just be
 
 ### Features
 
-Right now, Obfuscatron is able to store data within the following Python syntax:
+* Store binary or text data within the identifiers of a Python script
+* Obfuscated Python script can be executed (see notes below)
+
+Currently, Obfuscatron is able to store data within the following Python syntax:
 
 * Variables
 * Class Names
@@ -22,7 +25,7 @@ $ pip install "git+https://github.com/Pebaz/obfuscatron"
 ### Usage
 
 ```bash
-$ obfuscatron FILE.py encode DATAFILE OUTFILE
+$ obfuscatron FILE.py encode DATAFILE OUTFILE.py
 $ obfuscatron OUTFILE.py decode DATAFILE
 ```
 
@@ -217,3 +220,14 @@ To get it back:
 ```bash
 $ obfuscatron obfuscated-python-file.py decode get-original-data-back.txt
 ```
+
+
+### Notes
+
+Since Python is a fully dynamic language, any section of code within a Python
+script can lookup specific variables, classes, and functions by name. Scripts
+using this feature of Python will not work after being obfuscated by Obfuscatron
+because Obfuscatron changes the names of all the identifiers in the script. To
+properly use Obfuscatron, use an input script that works (to not draw attention
+to the variable names storing data), and ensure that no dynamic name
+introspection occurs during runtime.

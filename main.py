@@ -244,7 +244,7 @@ def main(args=None):
                 'obfuscatron - store data in Python source files pretending to '
                 'be obfuscated\n'
                 'Usage:\n'
-                '  obfuscatron FILE.py encode DATAFILE OUTFILE\n'
+                '  obfuscatron FILE.py encode DATAFILE OUTFILE.py\n'
                 '  obfuscatron OUTFILE.py decode DATAFILE'
             )
             return
@@ -281,9 +281,6 @@ def main(args=None):
 
         with open(data_file, 'wb') as file:
             file.write(output_data)
-
-# TODO(pebaz): setup.py
-# TODO(pebaz): Upload to PyPI
 
 
 if __name__ == '__main__':
